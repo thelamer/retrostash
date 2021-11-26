@@ -1,0 +1,56 @@
+ifeq ($(STATIC_LINKING), 1)
+  TARGET = 81_libretro$(LIBEXT)
+else
+  TARGET = 81_libretro$(SOEXT)
+endif
+
+DEFINES  += -DSHA1_REMOVE_MAIN=1
+CFLAGS   += -Wall
+CXXFLAGS += -Wall
+LDFLAGS  +=
+LDXFLAGS +=
+
+HEADERS = $(ROMS:.rom=.h) $(SNAPS:.z81=.h)
+OBJS    = $(SOURCES_C:.c=$(OBJEXT)) $(SOURCES_CXX:.cpp=$(OBJEXT))
+
+%$(OBJEXT): %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+%$(OBJEXT): %.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+%$(OBJEXT): %.S
+	$(CC_AS) -c -o $@ $< $(CFLAGS)
+
+%.h: %.rom
+	xxd -i $< | sed "s/unsigned/const unsigned/g" | sed "s/___//g" > $@
+
+%.h: %.z81
+	xxd -i $< | sed "s/unsigned/const unsigned/g" | sed "s/___//g" > $@
+
+all: $(TARGET)
+
+$(TARGET): $(HEADERS) $(OBJS)
+ifeq ($(STATIC_LINKING), 1)
+	$(AR) rcs $@ $(OBJS)
+else
+	$(CXX) -o $@ $(OBJS) $(LDXFLAGS)
+endif
+
+$(CORE_DIR)/src/snap.o: $(CORE_DIR)/src/snap.c $(HEADERS)
+
+$(CORE_DIR)/src/coreopt.o: $(CORE_DIR)/src/coreopt.c $(CORE_DIR)/src/gamedb/db.inl
+
+$(CORE_DIR)/src/version.c: FORCE
+	cat $(CORE_DIR)/etc/version.c.templ | sed s/HASH/`git rev-parse HEAD | tr -d "\n"`/g > $@
+
+clean-objs:
+	rm -f $(OBJS)
+
+clean: clean-objs
+	rm -f $(TARGET)
+
+dist-clean: clean
+	rm -f $(HEADERS)
+
+.PHONY: clean-objs clean dist-clean FORCE
