@@ -1,11 +1,11 @@
 //"use strict";
-
+var readyAudioContext;
 var LibraryRWebAudio = {
    $RA__deps: ['$Browser'],
    $RA: {
       BUFFER_SIZE: 2048,
 
-      context: null,
+      context: readyAudioContext,
       buffers: [],
       numBuffers: 0,
       bufIndex: 0,
@@ -79,12 +79,6 @@ var LibraryRWebAudio = {
    },
 
    RWebAudioInit: function(latency) {
-      var ac = window['AudioContext'] || window['webkitAudioContext'];
-
-      if (!ac) return 0;
-
-      RA.context = new ac();
-
       RA.numBuffers = ((latency * RA.context.sampleRate) / (1000 * RA.BUFFER_SIZE))|0;
       if (RA.numBuffers < 2) RA.numBuffers = 2;
 

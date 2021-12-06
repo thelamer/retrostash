@@ -14,6 +14,13 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Direct3D 11 driver.
+ *
+ * Minimum version : Direct3D 11.0 (Feature Level 11.0) (2009)
+ * Minimum OS      : Windows Vista, Windows 7
+ * Recommended OS  : Windows 7 and/or later
+ */
+
 #define CINTERFACE
 #define COBJMACROS
 
@@ -1491,7 +1498,7 @@ static void *d3d11_gfx_init(const video_info_t* video,
          utf16_to_char_string((const uint16_t*)
                desc.Description, str, sizeof(str));
 
-         RARCH_LOG("[D3D11]: Found GPU at index %d: %s\n", i, str);
+         RARCH_LOG("[D3D11]: Found GPU at index %d: \"%s\".\n", i, str);
 
          string_list_append(d3d11->gpu_list, str, attr);
 
@@ -1524,12 +1531,12 @@ error:
    d3d11_gfx_free(d3d11);
 
 #ifdef HAVE_OPENGL
-   retroarch_force_video_driver_fallback("gl");
+   video_driver_force_fallback("gl");
 #elif !defined(__WINRT__)
 #ifdef HAVE_OPENGL1
-   retroarch_force_video_driver_fallback("gl1");
+   video_driver_force_fallback("gl1");
 #else
-   retroarch_force_video_driver_fallback("gdi");
+   video_driver_force_fallback("gdi");
 #endif
 #endif
 
@@ -1618,7 +1625,7 @@ static void d3d11_init_render_targets(d3d11_video_t* d3d11, unsigned width, unsi
          height = d3d11->vp.height;
       }
 
-      RARCH_LOG("[D3D11]: Updating framebuffer size %u x %u.\n", width, height);
+      RARCH_LOG("[D3D11]: Updating framebuffer size %ux%u.\n", width, height);
 
       if ((i != (d3d11->shader_preset->passes - 1)) || (width != d3d11->vp.width) ||
             (height != d3d11->vp.height))
@@ -2318,9 +2325,9 @@ static bool d3d11_get_hw_render_interface(
 
 #ifndef __WINRT__
 static void d3d11_get_video_output_size(void *data,
-      unsigned *width, unsigned *height)
+      unsigned *width, unsigned *height, char *desc, size_t desc_len)
 {
-   win32_get_video_output_size(width, height);
+   win32_get_video_output_size(width, height, desc, desc_len);
 }
 
 static void d3d11_get_video_output_prev(void *data)
