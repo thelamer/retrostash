@@ -1,7 +1,0 @@
-*.a
-*.o
-*.so
-*.dll
-*.dylib
-/old
-

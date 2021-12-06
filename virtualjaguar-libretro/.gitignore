@@ -1,9 +1,0 @@
-*.o
-*.so
-*.dll
-*.dylib
-*.exe
-*.js
-*.bc
-.DS_Store
-.build
